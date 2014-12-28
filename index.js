@@ -1,5 +1,6 @@
 var paper = Raphael(0, 0, 700, 700);
 var emojis = [];
+var selectedEmojis = [];
 
 var bodyColours = ["#C62828", "#6A1B9A", "#283593",
 "#1565C0", "#0277BD", "#0097A7"];
@@ -41,9 +42,9 @@ function createObjects() {
         eyeColours.length-1)]
       };
 
-  emojis.push(emoji1);
-  emojis.push(emoji2);
-  emojis.push(emoji3);
+      emojis.push(emoji1);
+      emojis.push(emoji2);
+      emojis.push(emoji3);
 
 
 }
@@ -68,7 +69,27 @@ function drawShapes() {
     eyeRight.attr('stroke', 'none');
 
     face.click(function(event) {
-      console.log(this.id);
+
+      var selectedEmoji = emojis[this.id];
+
+      if(selectedEmojis.indexOf(selectedEmoji) == -1){
+
+        //add to array
+        selectedEmojis.push(selectedEmoji);
+        this.attr("stroke", "#ffcc00");
+        this.attr("stroke-width", "5");
+
+      } else {
+
+        var index =  selectedEmojis.indexOf(selectedEmoji);
+
+        selectedEmojis.splice(index, 1);
+        //remove from array
+        this.attr("stroke", "black");
+        this.attr("stroke-width", "1");
+      }
+
+
     });
 
   }
