@@ -39,6 +39,7 @@ function drawShapes() {
     var emoji = emojis[i];
 
     var face = paper.circle(emoji.cx, emoji.cy, 50);
+    face.id = i;
     face.attr("fill", emoji.fill);
 
     var eyeLeft = paper.circle(emoji.cx - 18, emoji.cy - 5, 3);
@@ -47,7 +48,9 @@ function drawShapes() {
     var eyeRight = paper.circle(emoji.cx + 18, emoji.cy - 5, 3);
     eyeRight.attr("fill", emoji.eyeColour);
 
-
+    face.click(function(event) {
+      console.log(this.id);
+    });
 
   }
 
