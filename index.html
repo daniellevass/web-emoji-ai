@@ -12,114 +12,339 @@
   <script src="http://cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js"></script>
 <script>
 
+
 var paper = Raphael(0, 0, 700, 700);
+
+var emojiObject;
+var fillColours = ["#ffcc00", "#cc0000",
+"#E91E63", "#9C27B0", "#673AB7", "#3F51B5"
+, "#2196F3", "#03A9F4", "#00BCD4", "#009688"
+, "#4CAF50", "#8BC34A", "#FF9800", "#795548"];
+var eyeColours = ["#006064", "#212121", "#cc0000",
+"#ECEFF1", "#33691E"];
+var hapinessArray = ["happy", "meh", "unhappy"];
+var eyeType = ["dot", "line", "^"];
+
 var emojis = [];
 var selectedEmojis = [];
 
-var bodyColours = ["#C62828", "#6A1B9A", "#283593",
-"#1565C0", "#0277BD", "#0097A7"];
-var eyeColours = ["#FFEBEE", "#263238", "#607D8B", "#ECEFF1"];
+var mutationChance = 2;
 
+function setUp(){
 
-function randomIntFromInterval(min,max)
-{
-  return Math.floor(Math.random()*(max-min+1)+min);
-}
+  emojis.push(createEmjoji(1, 100, 150) );
+  emojis.push(createEmjoji(2, 300, 150) );
+  emojis.push(createEmjoji(3, 500, 150) );
 
+  emojis.push(createEmjoji(4, 100, 350) );
+  emojis.push(createEmjoji(5, 300, 350) );
+  emojis.push(createEmjoji(6, 500, 350) );
 
-function createObjects() {
-
-  emoji1 = {
-    'cx': 100,
-    'cy': 100,
-    'fill': bodyColours[randomIntFromInterval(0,
-      bodyColours.length-1)],
-      'eyeColour': eyeColours[randomIntFromInterval(0,
-        eyeColours.length-1)]
-      };
-
-      emoji2 = {
-        'cx': 300,
-        'cy': 100,
-        'fill': bodyColours[randomIntFromInterval(0,
-          bodyColours.length-1)],
-          'eyeColour': eyeColours[randomIntFromInterval(0,
-            eyeColours.length-1)]
-          };
-
-  emoji3 = {
-    'cx': 500,
-    'cy': 100,
-    'fill': bodyColours[randomIntFromInterval(0,
-      bodyColours.length-1)],
-      'eyeColour': eyeColours[randomIntFromInterval(0,
-        eyeColours.length-1)]
-      };
-
-emojis.push(emoji1);
-emojis.push(emoji2);
-emojis.push(emoji3);
+  emojis.push(createEmjoji(7, 100, 550) );
+  emojis.push(createEmjoji(8, 300, 550) );
+  emojis.push(createEmjoji(9, 500, 550) );
 
 
 }
 
 
-function drawShapes() {
+function createEmjoji(id, cx, cy){
 
-  for (var i in emojis) {
+  var emoji = {
+    'id':id,
+    'fill': fillColours[randomNumber(0, fillColours.length)],
+    'cx': cx,
+    'cy': cy,
+    'eyeType': eyeType[randomNumber(0, eyeType.length)],
+    'eyeColour': eyeColours[randomNumber(0, eyeColours.length)],
+    'happiness': hapinessArray[randomNumber(0,
+      hapinessArray.length)]
+    };
 
-    var emoji = emojis[i];
+    return emoji;
 
-    var face = paper.circle(emoji.cx, emoji.cy, 50);
-    face.id = i;
-    face.attr("fill", emoji.fill);
+  }
 
-    var eyeLeft = paper.circle(emoji.cx - 18, emoji.cy - 5, 3);
-    eyeLeft.attr("fill", emoji.eyeColour);
-    eyeLeft.attr('stroke', 'none');
+  function randomNumber(min,max)
+  {
+    return Math.floor(Math.random()*(max-min)+min);
+  }
 
-    var eyeRight = paper.circle(emoji.cx + 18, emoji.cy - 5, 3);
-    eyeRight.attr("fill", emoji.eyeColour);
-    eyeRight.attr('stroke', 'none');
+  function drawShapes(){
 
-    face.click(function(event) {
+    //draw "reset" button
+    var resetButton = paper.rect(20, 20, 130, 40, 10);
+    resetButton.attr("fill", "#bfbfbf");
 
-      var selectedEmoji = emojis[this.id];
+    var resetText = paper.text(80, 40, "Reset");
+    resetText.attr("font-size", "24");
 
-      if(selectedEmojis.indexOf(selectedEmoji) == -1){
+    resetButton.click( function() {
 
-        //add to array
-        selectedEmojis.push(selectedEmoji);
-        this.attr("stroke", "#ffcc00");
-        this.attr("stroke-width", "5");
+      paper.clear();
 
-      } else {
-
-        var index =  selectedEmojis.indexOf(selectedEmoji);
-
-        selectedEmojis.splice(index, 1);
-        //remove from array
-        this.attr("stroke", "black");
-        this.attr("stroke-width", "1");
-      }
-
+      setUp();
+      drawShapes();
 
     });
+
+    //draw "breed" button
+    var breedButton = paper.rect(170, 20, 130, 40, 10);
+    breedButton.attr("fill", "#bfbfbf");
+
+    var breedText = paper.text(230, 40, "Breed");
+    breedText.attr("font-size", "24");
+
+    breedButton.click( function() {
+
+      paper.clear();
+
+
+      breedSelectedEmojis();
+      drawShapes();
+
+    });
+
+
+    //draw all emojis
+    for (var i = 0; i < emojis.length; i++) {
+
+      var emoji = emojis[i];
+
+      drawSingleEmoji(emoji);
+
+
+    }
+
 
   }
 
 
-}
+  function breedSelectedEmojis(){
+
+    var parentAFill = selectedEmojis[0].fill;
+    var parentBFill = selectedEmojis[1].fill;
+
+    var parentAEye = selectedEmojis[0].eyeType;
+    var parentBEye = selectedEmojis[1].eyeType;
+
+    var parentAEyeColour = selectedEmojis[0].eyeColour;
+    var parentBEyeColour = selectedEmojis[1].eyeColour;
+
+    var parentAHappiness = selectedEmojis[0].happiness;
+    var parentBHappiness = selectedEmojis[1].happiness;
 
 
-createObjects();
-drawShapes();
+    console.log("~~~~~");
+
+    for (var i = 0; i < emojis.length; i++){
+
+      var babyEmoji = emojis[i];
+
+      //background colour
+      var backgroundColourChance = randomNumber(0,100);
+
+      if(backgroundColourChance < mutationChance){
+        //mutation
+        fillColours[randomNumber(0, fillColours.length)]
+      } else if(backgroundColourChance < 50){
+        // parent A
+        babyEmoji.fill = parentAFill;
+      } else {
+        //parent B
+        babyEmoji.fill = parentBFill;
+      }
+
+
+      //eye colour
+      var eyeColourChance = randomNumber(0,100);
+      if(eyeColourChance < mutationChance){
+        eyeColours[randomNumber(0, eyeColours.length)]
+      } else if(eyeColourChance < 50){
+        // parent A
+        babyEmoji.eyeColour = parentAEyeColour;
+      } else {
+        //parent B
+        babyEmoji.eyeColour = parentBEyeColour;
+      }
+
+
+      //eye type
+      var eyeTypeChance = randomNumber(0,100);
+
+      if(eyeTypeChance < 50){
+        eyeType[randomNumber(0, eyeType.length)];
+      }else if(eyeTypeChance < 50){
+        // parent A
+        babyEmoji.eyeType = parentAEye;
+      } else {
+        //parent B
+        babyEmoji.eyeType = parentBEye;
+      }
+
+
+      //happiness
+      var happinessChance = randomNumber(0,100);
+      if(happinessChance < 50){
+        hapinessArray[randomNumber(0, hapinessArray.length)]
+      } else if(happinessChance < 50){
+        // parent A
+        babyEmoji.happiness = parentAHappiness;
+      } else {
+        //parent B
+        babyEmoji.happiness = parentBHappiness;
+      }
+
+
+    }
+
+    selectedEmojis = [];
+
+  }
 
 
 
 
+  function drawSingleEmoji(emojiObject){
 
-            </script>
+    var faceShape = paper.circle(emojiObject.cx,
+    emojiObject.cy, 70);
+    faceShape.attr("fill", emojiObject.fill);
+
+    emojiObject.selected = false;
+
+    faceShape.click(function (event) {
+
+
+      if(emojiObject.selected == true){
+
+        //remove from selected emojis
+        //loop through your selected emojis
+        for (var i = 0; i < selectedEmojis.length; i++){
+
+          if (selectedEmojis[i] == emojiObject){
+            selectedEmojis.splice(i, 1);
+            faceShape.attr("stroke", "black");
+            faceShape.attr("stroke-width", "1");
+            emojiObject.selected = false;
+          }
+
+        }
+
+
+        emojiObject.selected = false;
+      } else {
+
+        //only add if we have space
+
+        if(selectedEmojis.length < 2){
+
+          faceShape.attr("stroke", "#8BC34A");
+          faceShape.attr("stroke-width", "5");
+
+          emojiObject.selected = true;
+
+          selectedEmojis.push(emojiObject);
+
+        }
+
+      }
+
+
+
+
+    });
+
+
+    if(emojiObject.eyeType == "dot"){
+      // dots
+      var eyeLeft = paper.circle(emojiObject.cx - 25,
+      emojiObject.cy - 15, 5);
+      eyeLeft.attr("fill", emojiObject.eyeColour);
+
+      var eyeLeft = paper.circle(emojiObject.cx + 25,
+      emojiObject.cy - 15, 5);
+      eyeLeft.attr("fill", emojiObject.eyeColour);
+
+    } else if (emojiObject.eyeType == "line"){
+      var eyeLeftX = (emojiObject.cx -30);
+      var eyeLeftY = (emojiObject.cy -15);
+
+      var eyeRightX = (emojiObject.cx +20);
+      var eyeRightY = (emojiObject.cy -15);
+
+      var eyeLeft = paper.path("M" + eyeLeftX + ","+ eyeLeftY +"l 10,0");
+      eyeLeft.attr("stroke-width", "5");
+      eyeLeft.attr("stroke", emojiObject.eyeColour);
+      eyeLeft.attr("stroke-linecap", "round");
+
+      var eyeRight = paper.path("M" + eyeRightX + ","+ eyeRightY +"l 10,0");
+      eyeRight.attr("stroke-width", "5");
+      eyeRight.attr("stroke", emojiObject.eyeColour);
+      eyeRight.attr("stroke-linecap", "round");
+
+    } else {
+      var eyeLeftX = (emojiObject.cx -30);
+      var eyeLeftY = (emojiObject.cy -15);
+
+      var eyeRightX = (emojiObject.cx +20);
+      var eyeRightY = (emojiObject.cy -15);
+
+      var eyeLeft = paper.path("M" + eyeLeftX + ","+ eyeLeftY
+      +"l 5,-5 l 5,5");
+      eyeLeft.attr("stroke-width", "5");
+      eyeLeft.attr("stroke", emojiObject.eyeColour);
+      eyeLeft.attr("stroke-linecap", "round");
+
+      var eyeRight = paper.path("M" + eyeRightX + ","+ eyeRightY
+      +"l 5,-5 l 5,5");
+      eyeRight.attr("stroke-width", "5");
+      eyeRight.attr("stroke", emojiObject.eyeColour);
+      eyeRight.attr("stroke-linecap", "round");
+    }
+
+
+    //code to determine mouth
+
+    if (emojiObject.happiness == "happy") {
+
+      var mouthX = emojiObject.cx - 30;
+      var mouthY = emojiObject.cy + 30;
+
+      var mouth = paper.path("M " + mouthX + "," + mouthY +
+      "q 30,15 60,0");
+      mouth.attr("stroke-linecap", "round");
+      mouth.attr("stroke-width", "4");
+
+    } else if (emojiObject.happiness == "unhappy") {
+      var mouthX = emojiObject.cx - 30;
+      var mouthY = emojiObject.cy + 30;
+
+      var mouth = paper.path("M " + mouthX + "," + mouthY +
+      "q 30,-15 60,0");
+      mouth.attr("stroke-linecap", "round");
+      mouth.attr("stroke-width", "4");
+    } else {
+      //neutral face
+      var mouthX = emojiObject.cx - 30;
+      var mouthY = emojiObject.cy + 30;
+
+      var mouth = paper.path("M " + mouthX + "," + mouthY +
+      "l 60,0");
+      mouth.attr("stroke-linecap", "round");
+      mouth.attr("stroke-width", "4");
+    }
+
+  }
+
+  setUp();
+  drawShapes();
+
+  
+
+
+
+</script>
 
           </body>
           </html>
